@@ -1,5 +1,8 @@
 use std::f64;
 
+// For reading command parameters
+use std::env;
+
 // Using the SI units, so Amperes for I
 const MU_ZERO: f64 = 1.25663706212e-6;
 const PI: f64 = std::f64::consts::PI;
@@ -15,21 +18,52 @@ const AXIS: char = 'z';
 // If N dims, it's N times. 
 // NUMBER_OF_POINTS_PER_DIMENSION should be a multiple of 4 for shifting
 const NUMBER_OF_POINTS_PER_DIMENSION: u32 = 2000;
+
+
 const STEP: f64 = 0.01;
 
 
 fn main() {
+    // Get the command-line arguments
+    let args: Vec<String> = env::args().collect();
+
+
+
+        // Parse the first argument as u32
+    let batchNumber: u32 = match args[1].parse() {
+        Ok(num) => num,
+        Err(_) => {
+            println!("Error: First argument is not a valid u32");
+            return;
+        }
+    };
+
+    // Parse the second argument as u32
+    let batchQty: u32 = match args[2].parse() {
+        Ok(num) => num,
+        Err(_) => {
+            println!("Error: Second argument is not a valid u32");
+            return;
+        }
+    };
+
+
+
+    let batchSize: f64 = 4.0*A/batchQty as f64;
+
+    let NUMBER_OF_POINTS_PER_DIMENSION_X: u32 = NUMBER_OF_POINTS_PER_DIMENSION / batchQty as u32;
+
+
     let zstart = -2.0*A;
-    let xstart = -2.0*A;
-    let xend = 2.0*A;
+    let xstart = -2.0*A+batchNumber as f64 *batchSize as f64;
+    let xend = xstart+batchSize as f64;
     let zend = 2.0*A;
     
-    let xsize = (xend - xstart)/NUMBER_OF_POINTS_PER_DIMENSION as f64;
+    let xsize = (xend - xstart)/NUMBER_OF_POINTS_PER_DIMENSION_X as f64;
     let zsize = (zend - zstart)/NUMBER_OF_POINTS_PER_DIMENSION as f64 ;
 
-    println!("X, Z, BZ_VALUE");
 
-    for px in 0..NUMBER_OF_POINTS_PER_DIMENSION {
+    for px in 0..NUMBER_OF_POINTS_PER_DIMENSION_X {
         for pz in 0..NUMBER_OF_POINTS_PER_DIMENSION {
             
             let xcoord = xstart + px as f64 *xsize;
